@@ -7,12 +7,22 @@ from app.api.captures import router as captures_router
 from app.api.files import router as files_router
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
+
+from app.core.rate_limit import limiter
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="MindVault API",
     version="1.0.0"
+)
+
+app.state.limiter = limiter
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler
 )
 
 app.add_middleware(

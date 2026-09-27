@@ -42,6 +42,7 @@ def get_current_user(
             algorithms=[ALGORITHM]
         )
 
+        # JWT must contain a subject
         user_id = payload.get("sub")
 
         if user_id is None:
@@ -50,15 +51,30 @@ def get_current_user(
                 detail="Invalid token"
             )
 
+        # User ID must be a valid integer
+        try:
+            user_id = int(user_id)
+        except (TypeError, ValueError):
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token"
+            )
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=401,
+            detail="Token has expired"
+        )
+
     except jwt.InvalidTokenError:
         raise HTTPException(
             status_code=401,
-            detail="Invalid or expired token"
+            detail="Invalid token"
         )
 
     user = (
         db.query(User)
-        .filter(User.id == int(user_id))
+        .filter(User.id == user_id)
         .first()
     )
 

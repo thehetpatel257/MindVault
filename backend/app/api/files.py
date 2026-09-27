@@ -16,7 +16,8 @@ from app.database import get_db
 from app.models.file import File
 from app.models.user import User
 from app.schemas.file import FileResponse as FileResponseSchema
-
+from fastapi import Request
+from app.core.rate_limit import limiter
 
 router = APIRouter(
     prefix="/files",
@@ -51,7 +52,9 @@ ALLOWED_CONTENT_TYPES = {
     "/upload",
     response_model=FileResponseSchema
 )
+@limiter.limit("10/minute")
 async def upload_file(
+    request: Request,
     uploaded_file: UploadFile = FastAPIFile(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
