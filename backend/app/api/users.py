@@ -53,7 +53,7 @@ def login_user(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=False,       # Change to True when using HTTPS
+        secure=True,       # Change to True when using HTTPS
         samesite="lax",
         max_age=30 * 60
     )
